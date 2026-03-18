@@ -1010,6 +1010,7 @@ MonoBehaviour:
   cam: {fileID: 435362572}
   car: {fileID: 1793058609}
   attached: 0
+  joint: {fileID: 0}
 --- !u!1 &1809055833
 GameObject:
   m_ObjectHideFlags: 0
@@ -1024,6 +1025,8 @@ GameObject:
   - component: {fileID: 1809055841}
   - component: {fileID: 1809055843}
   - component: {fileID: 1809055842}
+  - component: {fileID: 1809055845}
+  - component: {fileID: 1809055844}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -1166,6 +1169,45 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1809055844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809055833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac48a70721c9b2c419c354faca56b2ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  joint: {fileID: 1809055845}
+  car: {fileID: 1793058609}
+  player: {fileID: 1809055833}
+--- !u!145 &1809055845
+SpringJoint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809055833}
+  serializedVersion: 4
+  m_ConnectedBody: {fileID: 1793058610}
+  m_ConnectedArticulationBody: {fileID: 0}
+  m_Anchor: {x: 0, y: 1, z: 0}
+  m_AutoConfigureConnectedAnchor: 1
+  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
+  m_Spring: 10
+  m_Damper: 0.2
+  m_MinDistance: 0
+  m_MaxDistance: 10
+  m_Tolerance: 0.025
+  m_BreakForce: Infinity
+  m_BreakTorque: Infinity
+  m_EnableCollision: 0
+  m_EnablePreprocessing: 1
+  m_MassScale: 1
+  m_ConnectedMassScale: 1
 --- !u!1001 &1829242524
 PrefabInstance:
   m_ObjectHideFlags: 0

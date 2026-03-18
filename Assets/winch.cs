@@ -13,6 +13,7 @@ public class winch : MonoBehaviour
    public Camera cam;
    public GameObject car;
    public Boolean attached = false;
+   public SpringJoint joint;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
