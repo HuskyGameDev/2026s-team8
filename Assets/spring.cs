@@ -3,7 +3,8 @@ using UnityEngine;
 public class spring : MonoBehaviour
 {
     public SpringJoint joint;
-    public GameObject car;
+    public GameObject winch;
+    public GameObject winchPull;
     public GameObject player;
     private LineRenderer lineRenderer;
 
@@ -30,7 +31,12 @@ public class spring : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        lineRenderer.SetPosition(0, car.transform.position);
-        lineRenderer.SetPosition(0, player.transform.position);
-    }
+        lineRenderer.SetPosition(0, winch.transform.position);
+        lineRenderer.SetPosition(1, player.transform.position);
+
+        if(Input.GetMouseButtonDown(1))
+        {
+            lineRenderer.SetPosition(1, winchPull.transform.position);
+        }
+        }
 }

@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     bool isFallen = false;
     public float forced = 25f;
     public float moveTilt = 2f;
+    public float jumpHeight = 15;
 
     
 
@@ -32,7 +33,7 @@ public class PlayerMovement : MonoBehaviour
     if(canJump) {
         if (Input.GetButtonDown("Jump"))
         {
-            rb.AddForce(Vector3.up * 7f, ForceMode.Impulse); 
+            rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse); 
         }
     }
 
