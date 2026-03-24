@@ -19,7 +19,8 @@ public class winch : MonoBehaviour
    private LineRenderer lineRenderer;
    public GameObject player;
    public SpringJoint joint;
-   public float minWinchDistance = 4;
+   private bool auto = false;
+   public float minWinchDistance;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -38,11 +39,49 @@ public class winch : MonoBehaviour
 
         // Set the number of vertices
         lineRenderer.positionCount = 2;
+
+        lineRenderer.enabled = false;
+
+        winchObject.SetActive(false);
+        winchPull.SetActive(false);
+
+        joint.anchor = joint.transform.InverseTransformPoint(winchPull.transform.position);
+
+               joint.connectedAnchor = winchPos;
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        if(Input.GetKeyDown(KeyCode.G))
+        {
+            auto = !auto;
+            print(auto);
+        }
+
+        if(Input.GetKeyDown(KeyCode.E)) // logic for picking up a winch on the ground
+        {
+                float dist = Vector3.Distance(player.transform.position, winchObject.transform.position);
+                float distPull = Vector3.Distance(player.transform.position, winchPull.transform.position);
+                if(dist < minWinchDistance)
+            {
+                attached = false;
+                winchObject.SetActive(false);
+                joint.maxDistance = float.PositiveInfinity;
+                lineRenderer.enabled = false;
+            }
+                else if(distPull < minWinchDistance)
+            {
+                pull = false;
+                winchPull.SetActive(false);
+                joint.maxDistance = float.PositiveInfinity;
+                lineRenderer.enabled = false;
+                
+            }
+        }
+
         if(Input.GetMouseButtonDown(0)) {
         Vector3 screenPos = Input.mousePosition;
        // Vector3 mousePos = Camera.main.ScreenToWorldPoint(screenPos);
@@ -54,7 +93,13 @@ public class winch : MonoBehaviour
                 float winchDistance = Vector3.Distance(player.transform.position, hit.point);
                 if(minWinchDistance > winchDistance) {
                 // hit.transform is reference to car
-               winchPos = hit.transform.InverseTransformPoint(hit.point); // go from world space to car space
+                winchObject.SetActive(true);
+                lineRenderer.enabled = true;
+               winchPos = car.transform.InverseTransformPoint(hit.point);// go from world space to car space
+               joint.maxDistance = Vector3.Distance(winchObject.transform.position, winchPull.transform.position);
+               joint.anchor = joint.transform.InverseTransformPoint(winchPull.transform.position);
+
+               joint.connectedAnchor = winchPos;
                attached = true;
             }
         }
@@ -70,11 +115,17 @@ public class winch : MonoBehaviour
         if(Physics.Raycast(ray, out hit, 100f))
             {
                 float winchDistance = Vector3.Distance(player.transform.position, hit.point);
-                if(minWinchDistance > winchDistance) {
+                if(minWinchDistance > winchDistance && hit.transform != player.transform) {
                 // hit.transform is reference to car
+                winchPull.SetActive(true);
+                lineRenderer.enabled = true;
                pullWinchPos = hit.point; // gets pull winch position
                winchPull.transform.position = pullWinchPos; // set the pull winch position
-               joint.maxDistance = Vector3.Distance(lineRenderer.GetPosition(0), lineRenderer.GetPosition(1));
+               joint.maxDistance = Vector3.Distance(winchObject.transform.position, pullWinchPos);
+                joint.anchor = joint.transform.InverseTransformPoint(winchPull.transform.position);
+
+               joint.connectedAnchor = winchPos;
+
                pull = true;
             }
         }
@@ -82,6 +133,11 @@ public class winch : MonoBehaviour
         if(attached) {
         Vector3 worldWinch = car.transform.TransformPoint(winchPos);
         winchObject.transform.position = worldWinch;
+        if(!pull)
+            {
+                joint.maxDistance = 20;
+                joint.anchor = joint.transform.InverseTransformPoint(player.transform.position);
+            }
         }
 
         lineRenderer.SetPosition(0, winchObject.transform.position);
@@ -89,8 +145,13 @@ public class winch : MonoBehaviour
         {
             //winchPull.transform.position = pullWinchPos; //set the second winches position
             lineRenderer.SetPosition(1, pullWinchPos);
-            
+            if(Input.GetKey(KeyCode.F)) {
            joint.maxDistance -= (float).5*Time.deltaTime;
+            }
+            else if(auto)
+            {
+                joint.maxDistance -= (float).5*Time.deltaTime;
+            }
         }
         else {
         lineRenderer.SetPosition(1, player.transform.position);
