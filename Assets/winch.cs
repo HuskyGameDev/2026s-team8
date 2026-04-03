@@ -1,5 +1,6 @@
 
 using System;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
@@ -19,8 +20,9 @@ public class winch : MonoBehaviour
    private LineRenderer lineRenderer;
    public GameObject player;
    public SpringJoint joint;
-   private bool auto = false;
+   private bool auto = true;
    public float minWinchDistance;
+   public SpringJoint carJoint;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -55,7 +57,7 @@ public class winch : MonoBehaviour
     void Update()
     {
 
-        if(Input.GetKeyDown(KeyCode.G))
+        if(Input.GetKeyDown(KeyCode.P))
         {
             auto = !auto;
             print(auto);
@@ -68,7 +70,9 @@ public class winch : MonoBehaviour
                 if(dist < minWinchDistance)
             {
                 attached = false;
+                pull = false; // ensure it stops pulling when picked up
                 winchObject.SetActive(false);
+                winchPull.SetActive(false); // also deactivate the anchor if the car side is picked up
                 joint.maxDistance = float.PositiveInfinity;
                 lineRenderer.enabled = false;
             }
@@ -77,7 +81,7 @@ public class winch : MonoBehaviour
                 pull = false;
                 winchPull.SetActive(false);
                 joint.maxDistance = float.PositiveInfinity;
-                lineRenderer.enabled = false;
+                //lineRenderer.enabled = false;
                 
             }
         }
@@ -97,10 +101,12 @@ public class winch : MonoBehaviour
                 lineRenderer.enabled = true;
                winchPos = car.transform.InverseTransformPoint(hit.point);// go from world space to car space
                joint.maxDistance = Vector3.Distance(winchObject.transform.position, winchPull.transform.position);
+               //joint.spring = 1.5f * Vector3.Distance(winchObject.transform.position, winchPull.transform.position);
                joint.anchor = joint.transform.InverseTransformPoint(winchPull.transform.position);
 
                joint.connectedAnchor = winchPos;
                attached = true;
+              carJoint.maxDistance = 15;
             }
         }
     }
@@ -122,6 +128,7 @@ public class winch : MonoBehaviour
                pullWinchPos = hit.point; // gets pull winch position
                winchPull.transform.position = pullWinchPos; // set the pull winch position
                joint.maxDistance = Vector3.Distance(winchObject.transform.position, pullWinchPos);
+              // joint.spring = 1.5f * Vector3.Distance(winchObject.transform.position, winchPull.transform.position);
                 joint.anchor = joint.transform.InverseTransformPoint(winchPull.transform.position);
 
                joint.connectedAnchor = winchPos;
@@ -130,31 +137,62 @@ public class winch : MonoBehaviour
             }
         }
         }
+        
+        if(!pull && attached) 
+            {
+                 carJoint.connectedBody = player.GetComponent<Rigidbody>();
+            }
+            else {
+                carJoint.connectedBody = null;
+            }
+            if (Input.GetKey(KeyCode.F))
+                {
+                    carJoint.maxDistance -= (float)1 * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.G))
+                {
+                    carJoint.maxDistance += (float)1 * Time.deltaTime;
+                }
+                 if (Input.GetKey(KeyCode.LeftShift) && attached && !pull)
+                {
+                    carJoint.connectedBody = null;
+                    attached = false;
+                    lineRenderer.enabled = false;
+                }
+            
+            
         if(attached) {
         Vector3 worldWinch = car.transform.TransformPoint(winchPos);
         winchObject.transform.position = worldWinch;
-        if(!pull)
-            {
-                joint.maxDistance = 20;
-                joint.anchor = joint.transform.InverseTransformPoint(player.transform.position);
-            }
+
         }
 
-        lineRenderer.SetPosition(0, winchObject.transform.position);
-        if(pull)
+        if (attached)
         {
-            //winchPull.transform.position = pullWinchPos; //set the second winches position
-            lineRenderer.SetPosition(1, pullWinchPos);
-            if(Input.GetKey(KeyCode.F)) {
-           joint.maxDistance -= (float).5*Time.deltaTime;
-            }
-            else if(auto)
+            lineRenderer.SetPosition(0, winchObject.transform.position);
+            if (pull)
             {
-                joint.maxDistance -= (float).5*Time.deltaTime;
+                //winchPull.transform.position = pullWinchPos; //set the second winches position
+                lineRenderer.SetPosition(1, pullWinchPos);
+                if (Input.GetKey(KeyCode.F))
+                {
+                   // joint.maxDistance -= (float).5 * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.G))
+                {
+                   // joint.maxDistance += (float).5 * Time.deltaTime;
+                }
+                else if (auto && !float.IsPositiveInfinity(joint.maxDistance))
+                {
+                    joint.maxDistance -= (float).5 * Time.deltaTime;
+                    joint.maxDistance = joint.maxDistance - (joint.maxDistance / 20);
+                    //joint.maxDistance = joint.maxDistance - (joint.maxDistance / 1000);
+                }
             }
-        }
-        else {
-        lineRenderer.SetPosition(1, player.transform.position);
+            else
+            {
+                lineRenderer.SetPosition(1, player.transform.position);
+            }
         }
 
     }

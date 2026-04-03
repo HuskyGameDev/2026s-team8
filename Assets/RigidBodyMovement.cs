@@ -52,7 +52,8 @@ public class PlayerMovement : MonoBehaviour
         if(tiltTimer <= 0 && moveInput != Vector3.zero) //make sure the player is not fallen and is moving
         {
             Vector3 tiltAxis = Vector3.Cross(Vector3.up, moveInput); //get the axis to rotate the player around
-            rb.AddTorque(tiltAxis * moveTilt * rb.linearVelocity.magnitude, ForceMode.Acceleration);
+//rb.linearVelocity.magnitude
+            rb.AddTorque(tiltAxis * moveTilt * moveInput.magnitude, ForceMode.Acceleration);
         }
 
         float angle = Vector3.Angle(transform.up, Vector3.up); // find the angle between world up and player up (how much the player is tilted)
@@ -89,6 +90,7 @@ if (isFallen && tiltTimer <= 0 && angle < 15f)
         {
             canJump = false;
         }
+       // if(canJump) {
     // right the player if they fall or tilt
     Vector3 uprightAxis = Vector3.Cross(transform.up, Vector3.up);
     float tiltAmount = uprightAxis.magnitude;
@@ -101,5 +103,6 @@ else
         }
 
 
+   // }
     }
 }
